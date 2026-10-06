@@ -13,8 +13,8 @@ import kotlin.concurrent.thread
 object PaymentForwarder {
 
     private const val TAG = "PaymentForwarder"
-    private const val CONNECT_TIMEOUT_MS = 10000
-    private const val READ_TIMEOUT_MS = 10000
+    private const val CONNECT_TIMEOUT_MS = 15000
+    private const val READ_TIMEOUT_MS = 15000
 
     data class ForwardResult(
         val success: Boolean,
@@ -25,40 +25,54 @@ object PaymentForwarder {
 
     /**
      * Checks if the configured payment server is reachable.
+     * Uses primary /api/config endpoint with root fallback, and handles Render.com cold starts.
      */
     fun checkServerHealth(context: Context, onResult: (status: String, details: String) -> Unit) {
-        val serverUrl = ConfigManager.getServerUrl(context).trim().trimEnd('/')
-        if (serverUrl.isBlank()) {
+        val baseUrl = ConfigManager.getCleanBaseUrl(context)
+        if (baseUrl.isBlank()) {
             onResult("OFFLINE", "Server URL is empty")
             return
         }
 
         thread {
-            try {
-                // Try /api/config first or base URL
-                val testUrlStr = if (serverUrl.endsWith("/api/config", ignoreCase = true)) {
-                    serverUrl
-                } else {
-                    "$serverUrl/api/config"
-                }
-                val url = URL(testUrlStr)
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "GET"
-                conn.connectTimeout = 6000
-                conn.readTimeout = 6000
-                conn.instanceFollowRedirects = true
+            val primaryHealthUrl = ConfigManager.getHealthCheckUrl(context)
+            val fallbackUrl = baseUrl
+            var isOnline = false
+            var lastDetails = ""
 
-                val code = conn.responseCode
-                conn.disconnect()
+            for (targetUrl in listOf(primaryHealthUrl, fallbackUrl)) {
+                try {
+                    val url = URL(targetUrl)
+                    val conn = (url.openConnection() as HttpURLConnection).apply {
+                        requestMethod = "GET"
+                        connectTimeout = CONNECT_TIMEOUT_MS
+                        readTimeout = READ_TIMEOUT_MS
+                        instanceFollowRedirects = true
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Android; UPI-Forwarder)")
+                        setRequestProperty("Accept", "application/json, text/html, */*")
+                    }
 
-                if (code in 200..399) {
-                    onResult("ONLINE", "HTTP $code")
-                } else {
-                    onResult("OFFLINE", "HTTP $code")
+                    val code = conn.responseCode
+                    conn.disconnect()
+
+                    // Any HTTP 2xx or 3xx or even 401/403 indicates the server host is online & answering HTTP requests
+                    if (code in 200..499) {
+                        isOnline = true
+                        lastDetails = "HTTP $code"
+                        break
+                    } else {
+                        lastDetails = "HTTP $code"
+                    }
+                } catch (e: Exception) {
+                    lastDetails = e.message ?: "Connection error"
+                    Log.w(TAG, "Health check attempt failed for $targetUrl: ${e.message}")
                 }
-            } catch (e: Exception) {
-                Log.w(TAG, "Health check failed: ${e.message}")
-                onResult("OFFLINE", e.message ?: "Connection error")
+            }
+
+            if (isOnline) {
+                onResult("ONLINE", lastDetails)
+            } else {
+                onResult("OFFLINE", lastDetails)
             }
         }
     }

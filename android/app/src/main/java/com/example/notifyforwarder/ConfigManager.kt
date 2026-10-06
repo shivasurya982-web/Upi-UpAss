@@ -86,14 +86,29 @@ object ConfigManager {
     }
 
     /**
-     * Resolves the full `/api/notify` endpoint URL correctly regardless of trailing slashes.
+     * Cleans and normalizes the server base URL, stripping any trailing paths like /api/notify or /api/config.
+     */
+    fun getCleanBaseUrl(context: Context): String {
+        var url = getServerUrl(context).trim().trimEnd('/')
+        val apiNotifyRegex = Regex("""/api/notify/?$""", RegexOption.IGNORE_CASE)
+        val apiConfigRegex = Regex("""/api/config/?$""", RegexOption.IGNORE_CASE)
+        url = url.replace(apiNotifyRegex, "").replace(apiConfigRegex, "").trimEnd('/')
+        return if (url.isBlank()) DEFAULT_SERVER_URL else url
+    }
+
+    /**
+     * Resolves the full `/api/notify` endpoint URL correctly regardless of how the user entered the server URL.
      */
     fun getNotifyApiUrl(context: Context): String {
-        val baseUrl = getServerUrl(context).trim().trimEnd('/')
-        return if (baseUrl.endsWith("/api/notify", ignoreCase = true)) {
-            baseUrl
-        } else {
-            "$baseUrl/api/notify"
-        }
+        val base = getCleanBaseUrl(context)
+        return "$base/api/notify"
+    }
+
+    /**
+     * Resolves the primary health check endpoint URL (/api/config).
+     */
+    fun getHealthCheckUrl(context: Context): String {
+        val base = getCleanBaseUrl(context)
+        return "$base/api/config"
     }
 }

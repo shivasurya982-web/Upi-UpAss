@@ -19,7 +19,11 @@ object NotificationParser {
 
     // UTR / Reference parsing
     private val utrRegex = Regex(
-        """(?:upi\s*ref(?:erence)?(?:\s*no\.?|\s*num(?:ber)?)?|utr(?:\s*no\.?)?|ref(?:\s*no\.?)?|txn\s*id|transaction\s*(?:id|ref)|rrn)[\s:-]*([a-z0-9]{8,24})""",
+        """(?:upi\s*ref(?:erence)?(?:\s*no\.?|\s*num(?:ber)?)?|utr(?:\s*no\.?)?|ref(?:\s*no\.?)?|txn\s*id|transaction\s*(?:id|ref|no\.?)|rrn)[\s:-]*([a-z0-9]{8,24})""",
+        RegexOption.IGNORE_CASE
+    )
+    private val upiSlashRegex = Regex(
+        """(?:upi|upi/p2a|upi/p2m|rrn|imps)/([0-9]{12})""",
         RegexOption.IGNORE_CASE
     )
     private val standalone12DigitUtrRegex = Regex("""\b(\d{12})\b""")
@@ -42,11 +46,11 @@ object NotificationParser {
 
     // Incoming regex patterns indicating money received / credited
     private val incomingRegex = Regex(
-        """\b(?:received|credited|deposit|deposited)\b|\b(?:sent|transferred|paid)\s+you\b|\b(?:sent|transferred|paid)\s+(?:₹|rs\.?|inr\.?)?[\d,.]*\s*to\s+(?:you|your)\b|\badded\s+to\s+your\b|\bpayment\s+received\b|\bmoney\s+received\b|\bupi\s+payment\s+received\b|\bhas\s+received\b|\breceived\s+on\b|\bhas\s+been\s+credited\b""",
+        """\b(?:received|credited|deposit|deposited)\b|\b(?:sent|transferred|paid)\s+you\b|\b(?:sent|transferred|paid)\s+(?:₹|rs\.?|inr\.?)?[\d,.]*\s*to\s+(?:you|your)\b|\badded\s+to\s+your\b|\bpayment\s+received\b|\bmoney\s+received\b|\bupi\s+payment\s+received\b|\bhas\s+received\b|\breceived\s+on\b|\bhas\s+been\s+credited\b|\bcredited\s+with\b|\bcredited\s+by\b|\bcredited\s+to\b|\breceived\s+from\b""",
         RegexOption.IGNORE_CASE
     )
 
-    // Noise / security / non-payment keywords to filter out
+    // Noise / security / non-payment / promo / reward keywords to filter out
     private val nonPaymentIndicators = listOf(
         "otp",
         "one time password",
@@ -60,7 +64,16 @@ object NotificationParser {
         "bill generated",
         "pre-approved",
         "loan offer",
-        "apply now"
+        "apply now",
+        "reward earned",
+        "tap to reveal",
+        "cashback earned",
+        "scratch card",
+        "win up to",
+        "invite friends",
+        "earn up to",
+        "spin the wheel",
+        "discount voucher"
     )
 
     /**
@@ -165,9 +178,14 @@ object NotificationParser {
         if (utrMatch != null && utrMatch.groupValues[1].isNotBlank()) {
             utr = utrMatch.groupValues[1].trim()
         } else {
-            val standaloneMatch = standalone12DigitUtrRegex.find(combinedText)
-            if (standaloneMatch != null && standaloneMatch.groupValues[1].isNotBlank()) {
-                utr = standaloneMatch.groupValues[1].trim()
+            val slashMatch = upiSlashRegex.find(combinedText)
+            if (slashMatch != null && slashMatch.groupValues[1].isNotBlank()) {
+                utr = slashMatch.groupValues[1].trim()
+            } else {
+                val standaloneMatch = standalone12DigitUtrRegex.find(combinedText)
+                if (standaloneMatch != null && standaloneMatch.groupValues[1].isNotBlank()) {
+                    utr = standaloneMatch.groupValues[1].trim()
+                }
             }
         }
 

@@ -150,6 +150,52 @@ class NotificationParserTest {
     }
 
     @Test
+    fun testParseGPayRewardIgnored() {
+        val pkg = "com.google.android.apps.nbu.paisa.user"
+        val title = "Google Pay"
+        val text = "New reward earned! Tap to reveal"
+        val postTime = 1600000008000L
+
+        val record = NotificationParser.parseNotification(pkg, title, text, postTime, "Google Pay")
+
+        assertFalse(record.isPayment)
+        assertEquals("UNRELATED", record.classification)
+        assertEquals("IGNORED", record.forwardingStatus)
+        assertEquals("Not available in notification", record.amount)
+    }
+
+    @Test
+    fun testParseSmallPaymentExactPaise() {
+        val pkg = "com.google.android.apps.nbu.paisa.user"
+        val title = "Google Pay"
+        val text = "You received ₹1.37 from Customer (UPI Ref: 123456789012)"
+        val postTime = 1600000009000L
+
+        val record = NotificationParser.parseNotification(pkg, title, text, postTime, "Google Pay")
+
+        assertTrue(record.isPayment)
+        assertEquals("INCOMING", record.classification)
+        assertEquals("₹1.37", record.amount)
+        assertEquals(137L, record.amountPaise)
+        assertEquals("123456789012", record.utr)
+        assertEquals("YES", if (record.isPayment) "YES" else "NO")
+    }
+
+    @Test
+    fun testParseYonoDebitIgnored() {
+        val pkg = "com.sbi.lotusintouch"
+        val title = "YONO SBI"
+        val text = "Account is debited by Rs 500.00 on 06-Oct-26"
+        val postTime = 1600000010000L
+
+        val record = NotificationParser.parseNotification(pkg, title, text, postTime, "YONO SBI")
+
+        assertFalse(record.isPayment)
+        assertEquals("OUTGOING", record.classification)
+        assertEquals("IGNORED", record.forwardingStatus)
+    }
+
+    @Test
     fun testDeduplicationIdGeneration() {
         val time1 = 1600000000000L
         val time2 = 1600000002000L // within same 10-second bucket
