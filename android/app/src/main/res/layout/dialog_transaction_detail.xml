@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notification Diagnostics"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/diagTimestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Timestamp: 06-Oct-2026 12:34 PM"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/border_color" />
+
+        <!-- App & Package -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Source Application:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagAppAndPkg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="PhonePe (com.phonepe.app)"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Notification Title:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Payment Received"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp" />
+
+        <!-- Raw Text -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Full Notification Body:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagFullText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/neutral_bg"
+            android:padding="8dp"
+            android:text="Received ₹499.37 from Sivakumar via UPI..."
+            android:textColor="@color/text_primary"
+            android:textSize="12sp" />
+
+        <!-- Detected Amount & Paise -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Amount Extraction:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagAmountInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="₹499.37 (49937 paise)"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Matched Pattern -->
+        <TextView
+            android:id="@+id/diagPattern"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="Pattern match: ₹499.37"
+            android:textColor="@color/text_muted"
+            android:textSize="11sp" />
+
+        <!-- Direction & Classification -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Direction / Classification:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagDirection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="INCOMING (Valid Credit)"
+            android:textColor="@color/success_green"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Sender & UTR -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Extracted Sender / UTR:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagSenderUtr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sender: Sivakumar | UTR: 123456789012"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp" />
+
+        <!-- Forward Decision & Status -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Forwarding Result:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagForwardResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forwarded: YES (HTTP 200)"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Server Response Body -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Server Response Details:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/diagResponseBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/neutral_bg"
+            android:fontFamily="monospace"
+            android:padding="8dp"
+            android:text='{"success":true}'
+            android:textColor="@color/text_primary"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnCloseDiag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/primary"
+            android:text="Close Diagnostics"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+</ScrollView>

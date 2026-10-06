@@ -3,6 +3,7 @@
     <color name="primary">#0F172A</color>
     <color name="primary_dark">#020617</color>
     <color name="accent">#2563EB</color>
+    <color name="accent_bg">#EFF6FF</color>
     <color name="bg_main">#F8FAFC</color>
     <color name="card_bg">#FFFFFF</color>
     <color name="text_primary">#0F172A</color>
@@ -14,6 +15,8 @@
     <color name="success_bg">#DCFCE7</color>
     <color name="warning_red">#DC2626</color>
     <color name="warning_bg">#FEE2E2</color>
+    <color name="amber_yellow">#D97706</color>
+    <color name="amber_bg">#FEF3C7</color>
     <color name="neutral_gray">#475569</color>
     <color name="neutral_bg">#F1F5F9</color>
     <color name="border_color">#E2E8F0</color>

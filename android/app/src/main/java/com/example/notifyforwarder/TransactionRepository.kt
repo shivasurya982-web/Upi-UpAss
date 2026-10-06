@@ -3,7 +3,6 @@ package com.example.notifyforwarder
 import android.content.Context
 import android.content.SharedPreferences
 import org.json.JSONArray
-import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
 
 class TransactionRepository private constructor(context: Context) {
@@ -57,7 +56,7 @@ class TransactionRepository private constructor(context: Context) {
             recordsList[existingIndex] = record
         } else {
             seenIds.add(record.id)
-            recordsList.add(0, record) // Add latest at index 0
+            recordsList.add(0, record) // Add latest at top
             // Limit stored history to latest 100 records
             while (recordsList.size > 100) {
                 val removed = recordsList.removeAt(recordsList.lastIndex)
@@ -77,6 +76,23 @@ class TransactionRepository private constructor(context: Context) {
         return recordsList.firstOrNull { it.isPayment }
     }
 
+    @Synchronized
+    fun getLatestRecord(): TransactionRecord? {
+        return recordsList.firstOrNull()
+    }
+
+    @Synchronized
+    fun getPendingRetryRecords(): List<TransactionRecord> {
+        return recordsList.filter { it.isPayment && it.forwardingStatus == "PENDING_RETRY" && it.retryCount < 5 }
+    }
+
+    @Synchronized
+    fun clearHistory() {
+        recordsList.clear()
+        seenIds.clear()
+        saveToPrefs()
+    }
+
     fun setLastServerSuccessTime(timestamp: Long) {
         prefs.edit().putLong(KEY_LAST_SERVER_SUCCESS, timestamp).apply()
     }
@@ -85,10 +101,19 @@ class TransactionRepository private constructor(context: Context) {
         return prefs.getLong(KEY_LAST_SERVER_SUCCESS, 0L)
     }
 
+    fun setLastServerStatus(status: String) {
+        prefs.edit().putString(KEY_LAST_SERVER_STATUS, status).apply()
+    }
+
+    fun getLastServerStatus(): String {
+        return prefs.getString(KEY_LAST_SERVER_STATUS, "UNKNOWN") ?: "UNKNOWN"
+    }
+
     companion object {
         private const val PREFS_NAME = "upi_notify_forwarder_prefs"
-        private const val KEY_HISTORY = "history_records"
+        private const val KEY_HISTORY = "history_records_v2"
         private const val KEY_LAST_SERVER_SUCCESS = "last_server_success"
+        private const val KEY_LAST_SERVER_STATUS = "last_server_status"
 
         @Volatile
         private var INSTANCE: TransactionRepository? = null
